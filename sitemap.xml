@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/03/15/tcp_retransmission/</loc>
+    
+    <lastmod>2018-03-15T11:43:31.043Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/03/13/redux/</loc>
     
     <lastmod>2018-03-13T14:55:23.373Z</lastmod>
