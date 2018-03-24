@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/03/25/node_commonJS/</loc>
+    
+    <lastmod>2018-03-24T16:55:04.513Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/03/18/tcp_window_management/</loc>
     
     <lastmod>2018-03-18T09:06:04.921Z</lastmod>
