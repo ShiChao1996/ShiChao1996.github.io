@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><title>Go net/dial.go (II) | LOVAE BLOG</title><meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="format-detection" content="telephone=no"><meta name="author" content="John Doe"><meta name="designer" content="minfive"><meta name="keywords" content="lovae, shichao blog, 前端博客, 前端, 程序员, 前端开发, 全栈开发, node.js, javascript"><meta name="description" content="日常学习与兴趣交流的个人博客"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=yes"><meta name="mobile-web-app-capable" content="yes"><meta name="robots" content="all"><link rel="canonical" href="http://yoursite.com/2018/03/13/Go net:dial.go 阅读笔记(二)/index.html"><link rel="icon" type="image/png" href="http://oo12ugek5.bkt.clouddn.com/blog/images/favicon.ico" sizes="32x32"><link rel="stylesheet" href="/scss/base/index.css"><link rel="alternate" href="/atom.xml" title="Hexo"><link rel="stylesheet" href="/scss/views/page/post.css"></head><body ontouchstart><div id="page-loading" class="page page-loading" style="background-image:url(http://oo12ugek5.bkt.clouddn.com/blog/images/loader.gif)"></div><div id="page" class="page js-hidden"><header class="page__small-header page__header--small"><nav class="page__navbar"><div class="page__container navbar-container"><a class="page__logo" href="/" title="Hexo" alt="Hexo"><img src="http://oo12ugek5.bkt.clouddn.com/images/logo-text-white.png" alt="Hexo"></a><nav class="page__nav"><ul class="nav__list clearfix"><li class="nav__item"><a href="/" alt="首页" title="首页">首页</a></li><li class="nav__item"><a href="/archives" alt="归档" title="归档">归档</a></li><li class="nav__item"><a href="/demo" alt="作品" title="作品">作品</a></li><li class="nav__item"><a href="/music" alt="音乐" title="音乐">音乐</a></li><li class="nav__item"><a href="/about" alt="关于" title="关于">关于</a></li></ul></nav><button class="page__menu-btn" type="button"><i class="iconfont icon-menu"></i></button></div></nav></header><main class="page__container page__main"><div class="page__content"><article class="page__post"><div class="post__cover"><img src="http://image.littlechao.top/20180301160118000011.jpg" alt="Go net/dial.go (II)"></div><header class="post__info"><h1 class="post__title">Go net/dial.go (II)</h1><div class="post__mark"><div class="mark__block"><i class="mark__icon iconfont icon-write"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/">Lovae</a></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-time"></i><ul class="mark__list clearfix"><li class="mark__item"><span>2018-03-13</span></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-tab"></i><ul class="mark__list clearfix"></ul></div></div></header><div class="post__content"><p><a href="http://www.littlechao.top/#/index/article?_id=5a9823ceebc087002a3e7259" target="_blank" rel="noopener">上一篇文章</a> 我们大致分析了dial.go中的代码，起主要的功能就是为真正发起连接做一些准备，起到了应用层的作用（DNS解析等）。但是一个连接完整的连接还需要更深层次的网络协议来完成协作，所以我们接着上篇来分析，由于篇(懒)幅原因，只将<code>dialTcp</code>作为传输层的例子。。。话不多说，上代码：</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">dialTCP</span><span class="params">(ctx context.Context, net <span class="keyword">string</span>, laddr, raddr *TCPAddr)</span> <span class="params">(*TCPConn, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> testHookDialTCP != <span class="literal">nil</span> &#123; <span class="comment">//testHookDialTCP 是语言开发者为了测试留的钩子函数，不用管</span></span><br><span class="line">		<span class="keyword">return</span> testHookDialTCP(ctx, net, laddr, raddr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> doDialTCP(ctx, net, laddr, raddr)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Go net/dial.go (II) | LOVAE BLOG</title><meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="format-detection" content="telephone=no"><meta name="author" content="Lovae"><meta name="designer" content="minfive"><meta name="keywords" content="lovae, shichao blog, 前端博客, 前端, 程序员, 前端开发, 全栈开发, node.js, javascript"><meta name="description" content="日常学习与兴趣交流的个人博客"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=yes"><meta name="mobile-web-app-capable" content="yes"><meta name="robots" content="all"><link rel="canonical" href="http://littlechao.top/2018/03/13/Go net:dial.go 阅读笔记(二)/index.html"><link rel="icon" type="image/png" href="http://oo12ugek5.bkt.clouddn.com/blog/images/favicon.ico" sizes="32x32"><link rel="stylesheet" href="/scss/base/index.css"><link rel="alternate" href="/atom.xml" title="Hexo"><link rel="stylesheet" href="/scss/views/page/post.css"></head><body ontouchstart><div id="page-loading" class="page page-loading" style="background-image:url(http://oo12ugek5.bkt.clouddn.com/blog/images/loader.gif)"></div><div id="page" class="page js-hidden"><header class="page__small-header page__header--small"><nav class="page__navbar"><div class="page__container navbar-container"><a class="page__logo" href="/" title="Hexo" alt="Hexo"><img src="http://oo12ugek5.bkt.clouddn.com/images/logo-text-white.png" alt="Hexo"></a><nav class="page__nav"><ul class="nav__list clearfix"><li class="nav__item"><a href="/" alt="首页" title="首页">首页</a></li><li class="nav__item"><a href="/archives" alt="归档" title="归档">归档</a></li><li class="nav__item"><a href="/demo" alt="作品" title="作品">作品</a></li><li class="nav__item"><a href="/music" alt="音乐" title="音乐">音乐</a></li><li class="nav__item"><a href="/about" alt="关于" title="关于">关于</a></li></ul></nav><button class="page__menu-btn" type="button"><i class="iconfont icon-menu"></i></button></div></nav></header><main class="page__container page__main"><div class="page__content"><article class="page__post"><div class="post__cover"><img src="http://image.littlechao.top/20180301160118000011.jpg" alt="Go net/dial.go (II)"></div><header class="post__info"><h1 class="post__title">Go net/dial.go (II)</h1><div class="post__mark"><div class="mark__block"><i class="mark__icon iconfont icon-write"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/">Lovae</a></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-time"></i><ul class="mark__list clearfix"><li class="mark__item"><span>2018-03-13</span></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-tab"></i><ul class="mark__list clearfix"></ul></div></div></header><div class="post__content"><p><a href="http://www.littlechao.top/#/index/article?_id=5a9823ceebc087002a3e7259" target="_blank" rel="noopener">上一篇文章</a> 我们大致分析了dial.go中的代码，起主要的功能就是为真正发起连接做一些准备，起到了应用层的作用（DNS解析等）。但是一个连接完整的连接还需要更深层次的网络协议来完成协作，所以我们接着上篇来分析，由于篇(懒)幅原因，只将<code>dialTcp</code>作为传输层的例子。。。话不多说，上代码：</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">dialTCP</span><span class="params">(ctx context.Context, net <span class="keyword">string</span>, laddr, raddr *TCPAddr)</span> <span class="params">(*TCPConn, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> testHookDialTCP != <span class="literal">nil</span> &#123; <span class="comment">//testHookDialTCP 是语言开发者为了测试留的钩子函数，不用管</span></span><br><span class="line">		<span class="keyword">return</span> testHookDialTCP(ctx, net, laddr, raddr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> doDialTCP(ctx, net, laddr, raddr)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>注意现在所在文件是在<code>tcpsock_posix.go</code> 这部分是<strong>传输层</strong>的内容了。</p>
 </blockquote>
@@ -31,8 +31,8 @@
         
         <div class="post-announce">
             感谢您的阅读，本文由
-            <a href="http://yoursite.com">Hexo</a>
-            版权所有。如若转载，请注明出处：Hexo（<a href="http://yoursite.com/2018/03/13/Go net:dial.go 阅读笔记(二)/">http://yoursite.com/2018/03/13/Go net:dial.go 阅读笔记(二)/</a>）
+            <a href="http://littlechao.top">Hexo</a>
+            版权所有。如若转载，请注明出处：Hexo（<a href="http://littlechao.top/2018/03/13/Go net:dial.go 阅读笔记(二)/">http://littlechao.top/2018/03/13/Go net:dial.go 阅读笔记(二)/</a>）
         </div>
         
 
@@ -83,6 +83,30 @@
         <ul class="block-list latest-post-list">
             
                     <li class="latest-post-item">
+                        <a href="/2018/03/26/tcp_congestion_control/" title="TCP 拥塞控制">
+                            <div class="item__cover">
+                                <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="TCP 拥塞控制">
+                            </div>
+                            <div class="item__info">
+                                <h3 class="item__title">TCP 拥塞控制</h3>
+                                <span class="item__text">2018-03-26</span>
+                            </div>
+                        </a>
+                    </li>
+                
+                    <li class="latest-post-item">
+                        <a href="/2018/03/25/node_async_io/" title="Node 异步 I/O">
+                            <div class="item__cover">
+                                <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="Node 异步 I/O">
+                            </div>
+                            <div class="item__info">
+                                <h3 class="item__title">Node 异步 I/O</h3>
+                                <span class="item__text">2018-03-25</span>
+                            </div>
+                        </a>
+                    </li>
+                
+                    <li class="latest-post-item">
                         <a href="/2018/03/25/node_commonJS/" title="node 模块机制">
                             <div class="item__cover">
                                 <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="node 模块机制">
@@ -102,30 +126,6 @@
                             <div class="item__info">
                                 <h3 class="item__title">TCP 数据流与窗口管理</h3>
                                 <span class="item__text">2018-03-18</span>
-                            </div>
-                        </a>
-                    </li>
-                
-                    <li class="latest-post-item">
-                        <a href="/2018/03/15/tcp_retransmission/" title="TCP 超时重传">
-                            <div class="item__cover">
-                                <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="TCP 超时重传">
-                            </div>
-                            <div class="item__info">
-                                <h3 class="item__title">TCP 超时重传</h3>
-                                <span class="item__text">2018-03-15</span>
-                            </div>
-                        </a>
-                    </li>
-                
-                    <li class="latest-post-item">
-                        <a href="/2018/03/13/redux/" title="redux your app">
-                            <div class="item__cover">
-                                <img src="http://image.littlechao.top/20180204020725000005.jpg" alt="redux your app">
-                            </div>
-                            <div class="item__info">
-                                <h3 class="item__title">redux your app</h3>
-                                <span class="item__text">2018-03-13</span>
                             </div>
                         </a>
                     </li>
