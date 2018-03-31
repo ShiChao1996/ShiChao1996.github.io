@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><title>redux your app | LOVAE BLOG</title><meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="format-detection" content="telephone=no"><meta name="author" content="Lovae"><meta name="designer" content="minfive"><meta name="keywords" content="lovae, shichao blog, 前端博客, 前端, 程序员, 前端开发, 全栈开发, node.js, javascript"><meta name="description" content="日常学习与兴趣交流的个人博客"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=yes"><meta name="mobile-web-app-capable" content="yes"><meta name="robots" content="all"><link rel="canonical" href="http://littlechao.top/2018/03/13/redux/index.html"><link rel="icon" type="image/png" href="http://oo12ugek5.bkt.clouddn.com/blog/images/favicon.ico" sizes="32x32"><link rel="stylesheet" href="/scss/base/index.css"><link rel="alternate" href="/atom.xml" title="Hexo"><link rel="stylesheet" href="/scss/views/page/post.css"></head><body ontouchstart><div id="page-loading" class="page page-loading" style="background-image:url(http://oo12ugek5.bkt.clouddn.com/blog/images/loader.gif)"></div><div id="page" class="page js-hidden"><header class="page__small-header page__header--small"><nav class="page__navbar"><div class="page__container navbar-container"><a class="page__logo" href="/" title="Hexo" alt="Hexo"><img src="http://oo12ugek5.bkt.clouddn.com/images/logo-text-white.png" alt="Hexo"></a><nav class="page__nav"><ul class="nav__list clearfix"><li class="nav__item"><a href="/" alt="首页" title="首页">首页</a></li><li class="nav__item"><a href="/archives" alt="归档" title="归档">归档</a></li><li class="nav__item"><a href="/demo" alt="作品" title="作品">作品</a></li><li class="nav__item"><a href="/music" alt="音乐" title="音乐">音乐</a></li><li class="nav__item"><a href="/about" alt="关于" title="关于">关于</a></li></ul></nav><button class="page__menu-btn" type="button"><i class="iconfont icon-menu"></i></button></div></nav></header><main class="page__container page__main"><div class="page__content"><article class="page__post"><div class="post__cover"><img src="http://image.littlechao.top/20180204020725000005.jpg" alt="redux your app"></div><header class="post__info"><h1 class="post__title">redux your app</h1><div class="post__mark"><div class="mark__block"><i class="mark__icon iconfont icon-write"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/">Lovae</a></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-time"></i><ul class="mark__list clearfix"><li class="mark__item"><span>2018-03-13</span></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-tab"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/tags/redux/">Redux</a></li><li class="mark__item"><a href="/tags/react/">React</a></li></ul></div></div></header><div class="post__content"><h3 id="redux简介"><a href="#redux简介" class="headerlink" title="redux简介"></a>redux简介</h3><p>简单来说，redux 就是帮我们统一管理了 react 组件的 state 状态。</p><p>为什么要使用 redux 统一管理 state 呢？没有 redux 我们依旧可以开发 APP，但是当 APP 的复杂度到达一定程度的时候，摆在我们面前的就是 难以维护 的代码（其中包含组件大量的异步回调，数据处理等等），但是使用 redux 也会增加我们整个项目的复杂度，这就需要我们在两者之间进行权衡了，对于这一部分，redux 开发者给我们下面几个参考点：</p><blockquote><p>以下几种情况不需要使用 redux：</p></blockquote><ul><li><p>整体 UI 很简单，没有太多交互。</p></li><li><p>不需要与服务器进行大量交互，也没有使用 WebSocket。</p></li><li><p>视图层只从单一来源获取数据。</p></li></ul><blockquote><p>以下几种情况可考虑使用 redux：</p></blockquote><ul><li><p>用户的交互复杂。</p></li><li><p>根据层级用户划分功能。</p></li><li><p>多个用户之间协作。</p></li><li><p>与服务器大量交互，或使用了 WebSocket。</p></li><li><p>视图层需要从多个来源获取数据。</p></li></ul><p>总结以上内容：redux 适用于 多交互，多数据源，复杂程度高的工程中。</p><p>也就是说，当我们的组件出现 某个状态需要共享，需要改变另一个组件状态 等传值比较不容易的情况。就可以考虑 redux ，当然还有其他 redux 的替代产品供我们使用。。</p><h3 id="重要内容"><a href="#重要内容" class="headerlink" title="重要内容"></a>重要内容</h3><p><img src="http://upload-images.jianshu.io/upload_images/2041009-06f5967c685f961b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p><blockquote><p>为了避免混乱，我们不应该直接修改 redux 的状态，需要有特定的办法来修改状态。<br>首先我们需要 <strong>action</strong> 来触发一个行为，告知 redux 我们需要修改状态，<br>然后应由专门生产新状态的 <strong>reducer</strong> 来产生新的状态</p></blockquote><h5 id="action"><a href="#action" class="headerlink" title="action"></a>action</h5><blockquote><p>action 是一个对象，包含这个行为的 <strong>类型</strong> 和必要的参数(可选)。action也可写成一个返回对象的函数(ActionCreator)</p></blockquote><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">testAction</span>(<span class="params">key1, key2, ...keyN</span>) </span>&#123;</span><br><span class="line">          <span class="keyword">return</span> &#123;</span><br><span class="line">              type: <span class="string">"TEST_ACTION"</span>,</span><br><span class="line">              key1: key1,</span><br><span class="line">              <span class="comment">//...</span></span><br><span class="line">              keyN: keyN</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>redux your app | LOVAE BLOG</title><meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="format-detection" content="telephone=no"><meta name="author" content="Lovae"><meta name="designer" content="minfive"><meta name="keywords" content="lovae, shichao blog, 前端博客, 前端, 程序员, 前端开发, 全栈开发, node.js, javascript"><meta name="description" content="日常学习与兴趣交流的个人博客"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=yes"><meta name="mobile-web-app-capable" content="yes"><meta name="robots" content="all"><link rel="canonical" href="http://littlechao.top/2018/03/13/redux/index.html"><link rel="icon" type="image/png" href="http://oo12ugek5.bkt.clouddn.com/blog/images/favicon.ico" sizes="32x32"><link rel="stylesheet" href="/scss/base/index.css"><link rel="alternate" href="/atom.xml" title="Hexo"><link rel="stylesheet" href="/scss/views/page/post.css"></head><body ontouchstart><div id="page-loading" class="page page-loading" style="background-image:url(http://oo12ugek5.bkt.clouddn.com/blog/images/loader.gif)"></div><div id="page" class="page js-hidden"><header class="page__small-header page__header--small"><nav class="page__navbar"><div class="page__container navbar-container"><a class="page__logo" href="/" title="Hexo" alt="Hexo"><img src="http://oo12ugek5.bkt.clouddn.com/images/logo-text-white.png" alt="Hexo"></a><nav class="page__nav"><ul class="nav__list clearfix"><li class="nav__item"><a href="/" alt="首页" title="首页">首页</a></li><li class="nav__item"><a href="/archive" alt="归档" title="归档">归档</a></li><li class="nav__item"><a href="/about" alt="关于" title="关于">关于</a></li></ul></nav><button class="page__menu-btn" type="button"><i class="iconfont icon-menu"></i></button></div></nav></header><main class="page__container page__main"><div class="page__content"><article class="page__post"><div class="post__cover"><img src="http://image.littlechao.top/20180204020725000005.jpg" alt="redux your app"></div><header class="post__info"><h1 class="post__title">redux your app</h1><div class="post__mark"><div class="mark__block"><i class="mark__icon iconfont icon-write"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/">Lovae</a></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-time"></i><ul class="mark__list clearfix"><li class="mark__item"><span>2018-03-13</span></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-tab"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/tags/redux/">Redux</a></li><li class="mark__item"><a href="/tags/react/">React</a></li></ul></div></div></header><div class="post__content"><h3 id="redux简介"><a href="#redux简介" class="headerlink" title="redux简介"></a>redux简介</h3><p>简单来说，redux 就是帮我们统一管理了 react 组件的 state 状态。</p><p>为什么要使用 redux 统一管理 state 呢？没有 redux 我们依旧可以开发 APP，但是当 APP 的复杂度到达一定程度的时候，摆在我们面前的就是 难以维护 的代码（其中包含组件大量的异步回调，数据处理等等），但是使用 redux 也会增加我们整个项目的复杂度，这就需要我们在两者之间进行权衡了，对于这一部分，redux 开发者给我们下面几个参考点：</p><blockquote><p>以下几种情况不需要使用 redux：</p></blockquote><ul><li><p>整体 UI 很简单，没有太多交互。</p></li><li><p>不需要与服务器进行大量交互，也没有使用 WebSocket。</p></li><li><p>视图层只从单一来源获取数据。</p></li></ul><blockquote><p>以下几种情况可考虑使用 redux：</p></blockquote><ul><li><p>用户的交互复杂。</p></li><li><p>根据层级用户划分功能。</p></li><li><p>多个用户之间协作。</p></li><li><p>与服务器大量交互，或使用了 WebSocket。</p></li><li><p>视图层需要从多个来源获取数据。</p></li></ul><p>总结以上内容：redux 适用于 多交互，多数据源，复杂程度高的工程中。</p><p>也就是说，当我们的组件出现 某个状态需要共享，需要改变另一个组件状态 等传值比较不容易的情况。就可以考虑 redux ，当然还有其他 redux 的替代产品供我们使用。。</p><h3 id="重要内容"><a href="#重要内容" class="headerlink" title="重要内容"></a>重要内容</h3><p><img src="http://upload-images.jianshu.io/upload_images/2041009-06f5967c685f961b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p><blockquote><p>为了避免混乱，我们不应该直接修改 redux 的状态，需要有特定的办法来修改状态。<br>首先我们需要 <strong>action</strong> 来触发一个行为，告知 redux 我们需要修改状态，<br>然后应由专门生产新状态的 <strong>reducer</strong> 来产生新的状态</p></blockquote><h5 id="action"><a href="#action" class="headerlink" title="action"></a>action</h5><blockquote><p>action 是一个对象，包含这个行为的 <strong>类型</strong> 和必要的参数(可选)。action也可写成一个返回对象的函数(ActionCreator)</p></blockquote><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">testAction</span>(<span class="params">key1, key2, ...keyN</span>) </span>&#123;</span><br><span class="line">          <span class="keyword">return</span> &#123;</span><br><span class="line">              type: <span class="string">"TEST_ACTION"</span>,</span><br><span class="line">              key1: key1,</span><br><span class="line">              <span class="comment">//...</span></span><br><span class="line">              keyN: keyN</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
 <h5 id="reducer"><a href="#reducer" class="headerlink" title="reducer"></a>reducer</h5><blockquote>
 <p>reducer 是一个纯函数，满足以下条件：</p>
 <ul>
@@ -46,7 +46,7 @@
             </div>
             <div class="post__prev post__prev--right">
                 
-                <a href="/2018/03/15/tcp_retransmission/" title="TCP 超时重传">TCP 超时重传<i class="iconfont icon-next"></i></a>
+                <a href="/2018/03/18/tcp_window_management/" title="TCP 数据流与窗口管理">TCP 数据流与窗口管理<i class="iconfont icon-next"></i></a>
                 
             </div>
         </div>
@@ -85,49 +85,49 @@
         <ul class="block-list latest-post-list">
             
                     <li class="latest-post-item">
-                        <a href="/2018/03/26/tcp_congestion_control/" title="TCP 拥塞控制">
+                        <a href="/2018/04/01/tcp_keepalive/" title="TCP 保活机制">
                             <div class="item__cover">
-                                <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="TCP 拥塞控制">
+                                <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="TCP 保活机制">
                             </div>
                             <div class="item__info">
-                                <h3 class="item__title">TCP 拥塞控制</h3>
-                                <span class="item__text">2018-03-26</span>
+                                <h3 class="item__title">TCP 保活机制</h3>
+                                <span class="item__text">2018-04-01</span>
                             </div>
                         </a>
                     </li>
                 
                     <li class="latest-post-item">
-                        <a href="/2018/03/25/node_async_io/" title="Node 异步 I/O">
+                        <a href="/2018/04/01/tcp_retransmission/" title="TCP 超时重传">
                             <div class="item__cover">
-                                <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="Node 异步 I/O">
+                                <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="TCP 超时重传">
+                            </div>
+                            <div class="item__info">
+                                <h3 class="item__title">TCP 超时重传</h3>
+                                <span class="item__text">2018-04-01</span>
+                            </div>
+                        </a>
+                    </li>
+                
+                    <li class="latest-post-item">
+                        <a href="/2018/03/29/node_async_io/" title="Node 异步 I/O">
+                            <div class="item__cover">
+                                <img src="/images/async/async_pic.png" alt="Node 异步 I/O">
                             </div>
                             <div class="item__info">
                                 <h3 class="item__title">Node 异步 I/O</h3>
-                                <span class="item__text">2018-03-25</span>
+                                <span class="item__text">2018-03-29</span>
                             </div>
                         </a>
                     </li>
                 
                     <li class="latest-post-item">
-                        <a href="/2018/03/25/node_commonJS/" title="node 模块机制">
+                        <a href="/2018/03/29/node_commonJS/" title="node 模块机制">
                             <div class="item__cover">
-                                <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="node 模块机制">
+                                <img src="/images/node_module/cover.jpg" alt="node 模块机制">
                             </div>
                             <div class="item__info">
                                 <h3 class="item__title">node 模块机制</h3>
-                                <span class="item__text">2018-03-25</span>
-                            </div>
-                        </a>
-                    </li>
-                
-                    <li class="latest-post-item">
-                        <a href="/2018/03/18/tcp_window_management/" title="TCP 数据流与窗口管理">
-                            <div class="item__cover">
-                                <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="TCP 数据流与窗口管理">
-                            </div>
-                            <div class="item__info">
-                                <h3 class="item__title">TCP 数据流与窗口管理</h3>
-                                <span class="item__text">2018-03-18</span>
+                                <span class="item__text">2018-03-29</span>
                             </div>
                         </a>
                     </li>
