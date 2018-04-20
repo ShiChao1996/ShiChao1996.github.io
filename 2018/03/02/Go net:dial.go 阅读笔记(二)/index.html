@@ -1,0 +1,264 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Go net/dial.go (II) | LOVAE BLOG</title><meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="format-detection" content="telephone=no"><meta name="author" content="Lovae"><meta name="designer" content="minfive"><meta name="keywords" content="lovae, shichao blog, 前端博客, 前端, 程序员, 前端开发, 全栈开发, node.js, javascript"><meta name="description" content="日常学习与兴趣交流的个人博客"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=yes"><meta name="mobile-web-app-capable" content="yes"><meta name="robots" content="all"><link rel="canonical" href="http://littlechao.top/2018/03/02/Go net:dial.go 阅读笔记(二)/index.html"><link rel="icon" type="image/png" href="http://oo12ugek5.bkt.clouddn.com/blog/images/favicon.ico" sizes="32x32"><link rel="stylesheet" href="/scss/base/index.css"><link rel="alternate" href="/atom.xml" title="Hexo"><link rel="stylesheet" href="/scss/views/page/post.css"></head><body ontouchstart><div id="page-loading" class="page page-loading" style="background-image:url(http://oo12ugek5.bkt.clouddn.com/blog/images/loader.gif)"></div><div id="page" class="page js-hidden"><header class="page__small-header page__header--small"><nav class="page__navbar"><div class="page__container navbar-container"><a class="page__logo" href="/" title="Hexo" alt="Hexo"><img src="http://oo12ugek5.bkt.clouddn.com/images/logo-text-white.png" alt="Hexo"></a><nav class="page__nav"><ul class="nav__list clearfix"><li class="nav__item"><a href="/" alt="Home" title="Home">Home</a></li><li class="nav__item"><a href="/archive" alt="Archive" title="Archive">Archive</a></li><li class="nav__item"><a href="/about" alt="About" title="About">About</a></li></ul></nav><button class="page__menu-btn" type="button"><i class="iconfont icon-menu"></i></button></div></nav></header><main class="page__container page__main"><div class="page__content"><article class="page__post"><div class="post__cover"><img src="https://image.littlechao.top/20180301160118000011.jpg" alt="Go net/dial.go (II)"></div><header class="post__info"><h1 class="post__title">Go net/dial.go (II)</h1><div class="post__mark"><div class="mark__block"><i class="mark__icon iconfont icon-write"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/">Lovae</a></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-time"></i><ul class="mark__list clearfix"><li class="mark__item"><span>2018-03-02</span></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-tab"></i><ul class="mark__list clearfix"></ul></div></div></header><div class="post__content"><p><a href="https://www.littlechao.top/#/index/article?_id=5a9823ceebc087002a3e7259" target="_blank" rel="noopener">上一篇文章</a> 我们大致分析了dial.go中的代码，起主要的功能就是为真正发起连接做一些准备，起到了应用层的作用（DNS解析等）。但是一个连接完整的连接还需要更深层次的网络协议来完成协作，所以我们接着上篇来分析，由于篇(懒)幅原因，只将<code>dialTcp</code>作为传输层的例子。。。话不多说，上代码：</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">dialTCP</span><span class="params">(ctx context.Context, net <span class="keyword">string</span>, laddr, raddr *TCPAddr)</span> <span class="params">(*TCPConn, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> testHookDialTCP != <span class="literal">nil</span> &#123; <span class="comment">//testHookDialTCP 是语言开发者为了测试留的钩子函数，不用管</span></span><br><span class="line">		<span class="keyword">return</span> testHookDialTCP(ctx, net, laddr, raddr)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> doDialTCP(ctx, net, laddr, raddr)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意现在所在文件是在<code>tcpsock_posix.go</code> 这部分是<strong>传输层</strong>的内容了。</p>
+</blockquote>
+<p>来看<code>doDialTCP</code>:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">doDialTCP</span><span class="params">(ctx context.Context, net <span class="keyword">string</span>, laddr, raddr *TCPAddr)</span> <span class="params">(*TCPConn, error)</span></span> &#123;</span><br><span class="line">	fd, err := internetSocket(ctx, net, laddr, raddr, syscall.SOCK_STREAM, <span class="number">0</span>, <span class="string">"dial"</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">2</span> &amp;&amp; (laddr == <span class="literal">nil</span> || laddr.Port == <span class="number">0</span>) &amp;&amp; (selfConnect(fd, err) || spuriousENOTAVAIL(err)); i++ &#123;</span><br><span class="line">		<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">			fd.Close()</span><br><span class="line">		&#125;</span><br><span class="line">		fd, err = internetSocket(ctx, net, laddr, raddr, syscall.SOCK_STREAM, <span class="number">0</span>, <span class="string">"dial"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> newTCPConn(fd), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>参数里的ctx自然不言而喻了，是为了控制请求超时取消请求释放资源的；<code>laddr</code>是 local address ， <code>raddr</code>是指 remote address；返回值这里会得到 <code>TCPConn</code>。代码不长，就是调用了 <code>internetSocket</code>得到一个文件描述符，并用其新建一个conn返回。但这里我想多说几句，因为不难发现， <code>internetSocket</code>可能会被调用多次，为什么呢？</p>
+<p>首先我们需要知道 Tcp 有一个极少使用的机制，叫<code>simultaneous connection</code>（同时连接）。正常的连接是：A主机 dial B主机，B主机 listen。 而同时连接则是： A 向 B dial 同时 B 向 A dial，那么 A 和 B 都不需要监听。</p>
+<p>我们知道，当 传入 dial  函数的参数<code>laddr</code>==<code>raddr</code>时，内核会拒绝dial。但如果传入的<code>laddr</code>为nil，kernel 会自动选择一个本机端口，这时候有可能会使得新的<code>laddr</code>==<code>raddr</code>,这个时候，kernel不会拒绝dial，并且这个dial会成功，原因是就<code>simultaneous connection</code>，这可能是kernel的bug。所以会判断是否是 <code>selfConnect</code>或者<code>spuriousENOTAVAIL</code>(spurious error not avail)来判断上一次调用<code>internetSocket</code>返回的 err 类型，在特定的情况下重新尝试<code>internetSocket</code>.关于这个问题的讨论参见<a href="https://stackoverflow.com/questions/4949858/how-can-you-have-a-tcp-connection-back-to-the-same-port" target="_blank" rel="noopener">这里</a>。</p>
+<p>好了，我们接下来看看<code>internetSocket</code>，该函数在<code>ipsock_posix.go</code>文件，到了<strong>网络层</strong>的范围了。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">internetSocket</span><span class="params">(ctx context.Context, net <span class="keyword">string</span>, laddr, raddr sockaddr, sotype, proto <span class="keyword">int</span>, mode <span class="keyword">string</span>)</span> <span class="params">(fd *netFD, err error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> (runtime.GOOS == <span class="string">"windows"</span> || runtime.GOOS == <span class="string">"openbsd"</span> || runtime.GOOS == <span class="string">"nacl"</span>) &amp;&amp; mode == <span class="string">"dial"</span> &amp;&amp; raddr.isWildcard() &#123;</span><br><span class="line">		raddr = raddr.toLocal(net) </span><br><span class="line">      <span class="comment">// 如果 raddr 是零地址，把它转化成当前系统对应的零地址格式(local system address 127.0.0.1 or ::1)</span></span><br><span class="line">	&#125;</span><br><span class="line">	family, ipv6only := favoriteAddrFamily(net, laddr, raddr, mode)</span><br><span class="line">	<span class="keyword">return</span> socket(ctx, net, family, sotype, proto, ipv6only, laddr, raddr)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>（sotype 和 proto 是生成 socket 文件d的系统调用时用的）首先判断了运行系统的类型，<code>favoriteAddrFamily</code>返回了当前 dial 最合适的地址族，主要是判断应该用ipv4还是ipv6或者都用，其返回值 family 有两种可能值：<code>AF_INET</code>和<code>AF_INET6</code>，都是int类型，感兴趣的朋友可以参见<a href="https://stackoverflow.com/questions/1593946/what-is-af-inet-and-why-do-i-need-it" target="_blank" rel="noopener">这里</a>。</p>
+<p>让我们接着关注<code>socket</code>,该函数在<code>sock_posix.go</code>文件，意味着接下来将是更加底层的系统调用了。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// socket returns a network file descriptor that is ready for</span></span><br><span class="line"><span class="comment">// asynchronous I/O using the network poller.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">socket</span><span class="params">(ctx context.Context, net <span class="keyword">string</span>, family, sotype, proto <span class="keyword">int</span>, ipv6only <span class="keyword">bool</span>, laddr, raddr sockaddr)</span> <span class="params">(fd *netFD, err error)</span></span> &#123;</span><br><span class="line">	s, err := sysSocket(family, sotype, proto)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err = setDefaultSockopts(s, family, sotype, ipv6only); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		poll.CloseFunc(s)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> fd, err = newFD(s, family, sotype, net); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		poll.CloseFunc(s)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// This function makes a network file descriptor for the</span></span><br><span class="line">	<span class="comment">// following applications:</span></span><br><span class="line">	<span class="comment">//</span></span><br><span class="line">	<span class="comment">// - An endpoint holder that opens a passive stream</span></span><br><span class="line">	<span class="comment">//   connection, known as a stream listener</span></span><br><span class="line">	<span class="comment">//</span></span><br><span class="line">	<span class="comment">// - An endpoint holder that opens a destination-unspecific</span></span><br><span class="line">	<span class="comment">//   datagram connection, known as a datagram listener</span></span><br><span class="line">	<span class="comment">//</span></span><br><span class="line">	<span class="comment">// - An endpoint holder that opens an active stream or a</span></span><br><span class="line">	<span class="comment">//   destination-specific datagram connection, known as a</span></span><br><span class="line">	<span class="comment">//   dialer</span></span><br><span class="line">	<span class="comment">//</span></span><br><span class="line">	<span class="comment">// - An endpoint holder that opens the other connection, such</span></span><br><span class="line">	<span class="comment">//   as talking to the protocol stack inside the kernel</span></span><br><span class="line">	<span class="comment">//</span></span><br><span class="line">	<span class="comment">// For stream and datagram listeners, they will only require</span></span><br><span class="line">	<span class="comment">// named sockets, so we can assume that it's just a request</span></span><br><span class="line">	<span class="comment">// from stream or datagram listeners when laddr is not nil but</span></span><br><span class="line">	<span class="comment">// raddr is nil. Otherwise we assume it's just for dialers or</span></span><br><span class="line">	<span class="comment">// the other connection holders.</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> laddr != <span class="literal">nil</span> &amp;&amp; raddr == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">switch</span> sotype &#123;</span><br><span class="line">		<span class="keyword">case</span> syscall.SOCK_STREAM, syscall.SOCK_SEQPACKET:</span><br><span class="line">			<span class="keyword">if</span> err := fd.listenStream(laddr, listenerBacklog); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				fd.Close()</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> fd, <span class="literal">nil</span></span><br><span class="line">		<span class="keyword">case</span> syscall.SOCK_DGRAM:</span><br><span class="line">			<span class="keyword">if</span> err := fd.listenDatagram(laddr); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				fd.Close()</span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> fd, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err := fd.dial(ctx, laddr, raddr); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fd.Close()</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> fd, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码隐含了大量细节，首先看最上面函数的注释，返回值是一个使用了<a href="https://segmentfault.com/a/1190000003063859" target="_blank" rel="noopener"><code>network poller</code></a>的<strong>异步I/O</strong>的文件描述符。前面三个 if 里，先创建了一个 socket，然后设置基本参数，再 new 一个文件描述符，其中包含了大量的系统调用和底层细节，这里先跳过。我想说的在下面。</p>
+<p>socket 这个函数可以为一下几种应用创建一个文件描述符：</p>
+<ul>
+<li>一个打开了 被动的、流式的 连接的终端，通常叫<code>stream listener</code></li>
+<li>一个打开了 没有具体目的地的、数据报格式的 连接的终端，通常叫<code>datagram listener</code></li>
+<li>一个打开了 主动的、有明确目的地的、数据报格式的 连接的终端，通常叫<code>dialer</code></li>
+<li>一个打开了其他连接的终端，比如与内核中的协议栈通信</li>
+</ul>
+<blockquote>
+<p>通常可以认为当 <code>laddr</code>不为空但<code>raddr</code>为空时的 request 是来自stream or datagram listeners。否则就是来自 dialers 或者其他系统连接。</p>
+</blockquote>
+<p>所以一个dialer和listener的区别就是 laddr， 也就是dialer在一定情况下可以当做listener，到这里就可以解释之前tcp的<code>simultaneous connection</code>同时连接了。</p>
+<p>接下来调用了fd的dial函数，这里才真正通过socket开始发送连接请求。</p>
+<p>(待续)</p>
+
+
+        
+        <div class="post-announce">
+            Thank you for reading, this article belongs to
+            <a href="http://littlechao.top">Hexo</a>
+            copyright, if reproduced, please indicate the source：Hexo（<a href="http://littlechao.top/2018/03/02/Go net:dial.go 阅读笔记(二)/">http://littlechao.top/2018/03/02/Go net:dial.go 阅读笔记(二)/</a>）
+        </div>
+        
+
+        <div class="post__prevs">
+            <div class="post__prev">
+                
+                <a href="/2018/03/01/golang net:dial.go/" title="Go net/dial.go（I）"><i class="iconfont icon-prev"></i>Go net/dial.go（I）</a>
+                
+            </div>
+            <div class="post__prev post__prev--right">
+                
+                <a href="/2018/03/04/Go net:http:serve.go 阅读笔记/" title="Go http/server.go">Go http/server.go<i class="iconfont icon-next"></i></a>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+        
+        
+    </div>
+
+    <aside class="page__sidebar">
+    
+
+    <form id="page-search-from" class="page__search-from" action="/search/">
+        <label class="search-form__item">
+            <input class="input" type="text" name="search" placeholder="Search...">
+            <i class="iconfont icon-search"></i>
+        </label>
+    </form>
+
+    
+        <div class="sidebar__block">
+            <h3 class="block__title">Introduction</h3>
+            <p class="block__text">日常学习与兴趣交流的个人博客</p>
+        </div>
+    
+
+    <div class="sidebar__block">
+        <h3 class="block__title">Categories</h3>
+        
+    </div>
+    
+    <div class="sidebar__block">
+        <h3 class="block__title">Latest Post</h3>
+        
+        <ul class="block-list latest-post-list">
+            
+                    <li class="latest-post-item">
+                        <a href="/2018/04/20/netstack_conn_handshake/" title="netstack TCP(II) 连接管理与三次握手">
+                            <div class="item__cover">
+                                <img src="/images/netstack/cover.jpg" alt="netstack TCP(II) 连接管理与三次握手">
+                            </div>
+                            <div class="item__info">
+                                <h3 class="item__title">netstack TCP(II) 连接管理与三次握手</h3>
+                                <span class="item__text">2018-04-20</span>
+                            </div>
+                        </a>
+                    </li>
+                
+                    <li class="latest-post-item">
+                        <a href="/2018/04/16/netstack 总览/" title="netstack TCP(I) 总览">
+                            <div class="item__cover">
+                                <img src="/images/netstack/cover.jpg" alt="netstack TCP(I) 总览">
+                            </div>
+                            <div class="item__info">
+                                <h3 class="item__title">netstack TCP(I) 总览</h3>
+                                <span class="item__text">2018-04-16</span>
+                            </div>
+                        </a>
+                    </li>
+                
+                    <li class="latest-post-item">
+                        <a href="/2018/04/15/intellij 自定义注释/" title="Intellij 自定义注释">
+                            <div class="item__cover">
+                                <img src="/images/intellij/intellij.jpeg" alt="Intellij 自定义注释">
+                            </div>
+                            <div class="item__info">
+                                <h3 class="item__title">Intellij 自定义注释</h3>
+                                <span class="item__text">2018-04-15</span>
+                            </div>
+                        </a>
+                    </li>
+                
+                    <li class="latest-post-item">
+                        <a href="/2018/04/01/tcp_keepalive/" title="TCP 保活机制">
+                            <div class="item__cover">
+                                <img src="http://oo12ugek5.bkt.clouddn.com/images/default_cover.png" alt="TCP 保活机制">
+                            </div>
+                            <div class="item__info">
+                                <h3 class="item__title">TCP 保活机制</h3>
+                                <span class="item__text">2018-04-01</span>
+                            </div>
+                        </a>
+                    </li>
+                
+        </ul>
+    
+    </div>
+
+    <div class="sidebar__block">
+        <h3 class="block__title">Tags</h3>
+        
+        <ul class="block-list tag-list clearfix">
+            
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/Intellij/">Intellij</a>
+                    </li>  
+                
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/JavaScript/">JavaScript</a>
+                    </li>  
+                
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/dart/">dart</a>
+                    </li>  
+                
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/golang/">golang</a>
+                    </li>  
+                
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/net/">net</a>
+                    </li>  
+                
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/netstack/">netstack</a>
+                    </li>  
+                
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/node/">node</a>
+                    </li>  
+                
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/react/">react</a>
+                    </li>  
+                
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/redux/">redux</a>
+                    </li>  
+                
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/regex/">regex</a>
+                    </li>  
+                
+                    <li class="tag-item">
+                        <a class="tag-link" href="/tags/tcp/">tcp</a>
+                    </li>  
+                
+        </ul>
+    
+    </div>
+
+    
+</aside>
+</main>
+
+
+        
+            
+<footer class="page__footer">
+    <section class="footer__top">
+        <div class="page__container footer__container">
+            
+            <div class="footer-top__item footer-top__item--2">
+                <h3 class="item__title">About</h3>
+                <div class="item__content">
+                    <p class="item__text">本站是基于 Hexo 搭建的静态资源博客，主要用于分享日常学习、生活及工作的一些心得总结，欢迎点击右下角订阅 rss。</p>
+                    <ul class="footer__contact-info">
+                        <li class="contact-info__item">
+                            <i class="iconfont icon-address"></i>
+                            <span>Baoding, Hebei Province, China</span>
+                        </li>
+                        <li class="contact-info__item">
+                            <i class="iconfont icon-email2"></i>
+                            <span>shichao1996@gmail.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            
+            
+                <div class="footer-top__item footer__image">
+                    <img src="http://oo12ugek5.bkt.clouddn.com/images/qrcode.png" alt="logo" title="Hexo">
+                </div>
+            
+            
+            
+            
+        </div>
+    </section>
+    <section class="footer__bottom">
+        <div class="page__container footer__container">
+            <p class="footer__copyright">©
+                <a href="https://github.com/Mrminfive/hexo-theme-skapp" target="_blank">Skapp</a> 2017 powered by
+                <a href="http://hexo.io/" target="_blank">Hexo</a>, made by 
+                <a href="https://github.com/Mrminfive" target="_blank">minfive</a>.
+            </p>
+            <ul class="footer__social-network clearfix">
+                
+            </ul>
+        </div>
+    </section>
+</footer>
+        
+
+        
+            
+<div id="back-top" class="back-top back-top--hidden js-hidden">
+    <i class="iconfont icon-top"></i>
+</div>
+        
+    </div>
+
+    <script src="/js/common.js"></script>
+
+    
+    <script src="/js/page/post.js"></script>
+
+
+    
+    
+
+
+    
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script></body></html>
