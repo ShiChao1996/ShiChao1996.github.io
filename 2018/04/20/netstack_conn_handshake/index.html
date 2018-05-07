@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><title>netstack TCP(II) 连接管理与三次握手 | LOVAE BLOG</title><meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="format-detection" content="telephone=no"><meta name="author" content="Lovae"><meta name="designer" content="minfive"><meta name="keywords" content="lovae, shichao blog, 前端博客, 前端, 程序员, 前端开发, 全栈开发, node.js, javascript"><meta name="description" content="日常学习与兴趣交流的个人博客"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=yes"><meta name="mobile-web-app-capable" content="yes"><meta name="robots" content="all"><link rel="canonical" href="http://littlechao.top/2018/04/20/netstack_conn_handshake/index.html"><link rel="icon" type="image/png" href="http://oo12ugek5.bkt.clouddn.com/blog/images/favicon.ico" sizes="32x32"><link rel="stylesheet" href="/scss/base/index.css"><link rel="alternate" href="/atom.xml" title="Hexo"><link rel="stylesheet" href="/scss/views/page/post.css"></head><body ontouchstart><div id="page-loading" class="page page-loading" style="background-image:url(http://oo12ugek5.bkt.clouddn.com/blog/images/loader.gif)"></div><div id="page" class="page js-hidden"><header class="page__small-header page__header--small"><nav class="page__navbar"><div class="page__container navbar-container"><a class="page__logo" href="/" title="Hexo" alt="Hexo"><img src="https://image.littlechao.top/20180506131200000003.jpg" alt="Hexo"></a><nav class="page__nav"><ul class="nav__list clearfix"><li class="nav__item"><a href="/" alt="首页" title="首页">首页</a></li><li class="nav__item"><a href="/archive" alt="归档" title="归档">归档</a></li><li class="nav__item"><a href="/about" alt="关于" title="关于">关于</a></li></ul></nav><button class="page__menu-btn" type="button"><i class="iconfont icon-menu"></i></button></div></nav></header><main class="page__container page__main"><div class="page__content"><article class="page__post"><div class="post__cover"><img src="/images/netstack/cover.jpg" alt="netstack TCP(II) 连接管理与三次握手"></div><header class="post__info"><h1 class="post__title">netstack TCP(II) 连接管理与三次握手</h1><div class="post__mark"><div class="mark__block"><i class="mark__icon iconfont icon-write"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/">Lovae</a></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-time"></i><ul class="mark__list clearfix"><li class="mark__item"><span>2018-04-20</span></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-tab"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/tags/tcp/">Tcp</a></li><li class="mark__item"><a href="/tags/netstack/">Netstack</a></li></ul></div></div></header><div class="post__content"><h2 id="Netsatck-TCP-II-连接的建立与三次握手"><a href="#Netsatck-TCP-II-连接的建立与三次握手" class="headerlink" title="Netsatck TCP(II) 连接的建立与三次握手"></a>Netsatck TCP(II) 连接的建立与三次握手</h2><h4 id="protocolListenLoop"><a href="#protocolListenLoop" class="headerlink" title="protocolListenLoop"></a>protocolListenLoop</h4><p>当新建一个 endpoint 并且将其 Bind 到一个端口后，这个endpoint 进入 protocolListenLoop，负责监听与连接建立。</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">e.protocolListenLoop(seqnum.Size(e.receiveBufferAvailable()))&#123;<span class="comment">// 同时设置了 rcvBuf 的大小</span></span><br><span class="line">    ctx := newListenContext(e.stack, rcvWnd, v6only, e.netProto)<span class="comment">// 只是为了带一些参数</span></span><br><span class="line"></span><br><span class="line">	s := sleep.Sleeper&#123;&#125;</span><br><span class="line">	s.AddWaker(&amp;e.notificationWaker, wakerForNotification)</span><br><span class="line">	s.AddWaker(&amp;e.newSegmentWaker, wakerForNewSegment)</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">switch</span> index, _ := s.Fetch(<span class="literal">true</span>); index &#123;</span><br><span class="line">		<span class="keyword">case</span> wakerForNotification:</span><br><span class="line">			n := e.fetchNotifications()</span><br><span class="line">			<span class="keyword">if</span> n&amp;notifyClose != <span class="number">0</span> &#123;	<span class="comment">// 表示收到退出通知</span></span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> wakerForNewSegment:</span><br><span class="line">			<span class="comment">// Process at most maxSegmentsPerWake segments.</span></span><br><span class="line">			mayRequeue := <span class="literal">true</span></span><br><span class="line">			<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; maxSegmentsPerWake; i++ &#123; </span><br><span class="line">                <span class="comment">// maxSegmentsPerWake==100,因为收到一个通知可能对应受到了多个数据包，所以每次 wake</span></span><br><span class="line">                <span class="comment">// 都处理多次</span></span><br><span class="line">				s := e.segmentQueue.dequeue()</span><br><span class="line">                <span class="keyword">if</span> s == <span class="literal">nil</span> &#123;</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">                &#125;</span><br><span class="line">				e.handleListenSegment(ctx, s)</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> mayRequeue &amp;&amp; !e.segmentQueue.empty() &#123;</span><br><span class="line">				e.newSegmentWaker.Assert()</span><br><span class="line">				<span class="comment">// maxSegmentsPerWake 次循环仍然没有处理完所有的包，再次唤醒 waker，继续处理</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>netstack TCP(II) 连接管理与三次握手 | LOVAE BLOG</title><meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="format-detection" content="telephone=no"><meta name="author" content="Lovae"><meta name="designer" content="minfive"><meta name="keywords" content="lovae, shichao blog, 前端博客, 前端, 程序员, 前端开发, 全栈开发, node.js, javascript"><meta name="description" content="日常学习与兴趣交流的个人博客"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=yes"><meta name="mobile-web-app-capable" content="yes"><meta name="robots" content="all"><link rel="canonical" href="http://littlechao.top/2018/04/20/netstack_conn_handshake/index.html"><link rel="icon" type="image/png" href="http://oo12ugek5.bkt.clouddn.com/blog/images/favicon.ico" sizes="32x32"><link rel="stylesheet" href="/scss/base/index.css"><link rel="alternate" href="/atom.xml" title="Hexo"><link rel="stylesheet" href="/scss/views/page/post.css"></head><body ontouchstart><div id="page-loading" class="page page-loading" style="background-image:url(http://oo12ugek5.bkt.clouddn.com/blog/images/loader.gif)"></div><div id="page" class="page js-hidden"><header class="page__small-header page__header--small"><nav class="page__navbar"><div class="page__container navbar-container"><a class="page__logo" href="/" title="Hexo" alt="Hexo"><img src="https://image.littlechao.top/20180506131200000003.jpg" alt="Hexo"></a><nav class="page__nav"><ul class="nav__list clearfix"><li class="nav__item"><a href="/" alt="Home" title="Home">Home</a></li><li class="nav__item"><a href="/archive" alt="Archive" title="Archive">Archive</a></li><li class="nav__item"><a href="/about" alt="About" title="About">About</a></li></ul></nav><button class="page__menu-btn" type="button"><i class="iconfont icon-menu"></i></button></div></nav></header><main class="page__container page__main"><div class="page__content"><article class="page__post"><div class="post__cover"><img src="/images/netstack/cover.jpg" alt="netstack TCP(II) 连接管理与三次握手"></div><header class="post__info"><h1 class="post__title">netstack TCP(II) 连接管理与三次握手</h1><div class="post__mark"><div class="mark__block"><i class="mark__icon iconfont icon-write"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/">Lovae</a></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-time"></i><ul class="mark__list clearfix"><li class="mark__item"><span>2018-04-20</span></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-tab"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/tags/tcp/">Tcp</a></li><li class="mark__item"><a href="/tags/netstack/">Netstack</a></li></ul></div></div></header><div class="post__content"><h2 id="Netsatck-TCP-II-连接的建立与三次握手"><a href="#Netsatck-TCP-II-连接的建立与三次握手" class="headerlink" title="Netsatck TCP(II) 连接的建立与三次握手"></a>Netsatck TCP(II) 连接的建立与三次握手</h2><h4 id="protocolListenLoop"><a href="#protocolListenLoop" class="headerlink" title="protocolListenLoop"></a>protocolListenLoop</h4><p>当新建一个 endpoint 并且将其 Bind 到一个端口后，这个endpoint 进入 protocolListenLoop，负责监听与连接建立。</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">e.protocolListenLoop(seqnum.Size(e.receiveBufferAvailable()))&#123;<span class="comment">// 同时设置了 rcvBuf 的大小</span></span><br><span class="line">    ctx := newListenContext(e.stack, rcvWnd, v6only, e.netProto)<span class="comment">// 只是为了带一些参数</span></span><br><span class="line"></span><br><span class="line">	s := sleep.Sleeper&#123;&#125;</span><br><span class="line">	s.AddWaker(&amp;e.notificationWaker, wakerForNotification)</span><br><span class="line">	s.AddWaker(&amp;e.newSegmentWaker, wakerForNewSegment)</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">switch</span> index, _ := s.Fetch(<span class="literal">true</span>); index &#123;</span><br><span class="line">		<span class="keyword">case</span> wakerForNotification:</span><br><span class="line">			n := e.fetchNotifications()</span><br><span class="line">			<span class="keyword">if</span> n&amp;notifyClose != <span class="number">0</span> &#123;	<span class="comment">// 表示收到退出通知</span></span><br><span class="line">				<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> wakerForNewSegment:</span><br><span class="line">			<span class="comment">// Process at most maxSegmentsPerWake segments.</span></span><br><span class="line">			mayRequeue := <span class="literal">true</span></span><br><span class="line">			<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; maxSegmentsPerWake; i++ &#123; </span><br><span class="line">                <span class="comment">// maxSegmentsPerWake==100,因为收到一个通知可能对应受到了多个数据包，所以每次 wake</span></span><br><span class="line">                <span class="comment">// 都处理多次</span></span><br><span class="line">				s := e.segmentQueue.dequeue()</span><br><span class="line">                <span class="keyword">if</span> s == <span class="literal">nil</span> &#123;</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">                &#125;</span><br><span class="line">				e.handleListenSegment(ctx, s)</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> mayRequeue &amp;&amp; !e.segmentQueue.empty() &#123;</span><br><span class="line">				e.newSegmentWaker.Assert()</span><br><span class="line">				<span class="comment">// maxSegmentsPerWake 次循环仍然没有处理完所有的包，再次唤醒 waker，继续处理</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><img src="/images/netstack/tcp_listenLoop.png" alt=""></p>
 <p>handleListenSegment  处理收到的数据包，优先判定是否有 SYN 标识。如果改数据包没有 SYN 而有 ACK 标识的话，那么根据三次握手，它属于第三步，验证其合法后，该数据包对应的连接已经建立，那么为该连接创建一个新的 endpoint，将其发给 Accept 队列。</p>
 <p>只要包含 SYN标识，那么说明该连接处于三步握手的第一步。为什么不是第二步？因为这是 Listen 函数，当前处于连接的被动方。这里会有一个队列，称为 SYN_RCVD 队列或半连接队列。长度为 max(64,/proc/sys/net/ipv4/tcp_max_syn_backlog) ，在机器的tcp_max_syn_backlog值在/proc/sys/net/ipv4/tcp_max_syn_backlog下配置。</p>
@@ -20,9 +20,9 @@
 
         
         <div class="post-announce">
-            感谢您的阅读，本文由
+            Thank you for reading, this article belongs to
             <a href="http://littlechao.top">Hexo</a>
-            版权所有。如若转载，请注明出处：Hexo（<a href="http://littlechao.top/2018/04/20/netstack_conn_handshake/">http://littlechao.top/2018/04/20/netstack_conn_handshake/</a>）
+            copyright, if reproduced, please indicate the source：Hexo（<a href="http://littlechao.top/2018/04/20/netstack_conn_handshake/">http://littlechao.top/2018/04/20/netstack_conn_handshake/</a>）
         </div>
         
 
@@ -33,6 +33,8 @@
                 
             </div>
             <div class="post__prev post__prev--right">
+                
+                <a href="/2018/05/07/netstack_linklayer/" title="Netstack(II) 链路层">Netstack(II) 链路层<i class="iconfont icon-next"></i></a>
                 
             </div>
         </div>
@@ -55,21 +57,33 @@
 
     
         <div class="sidebar__block">
-            <h3 class="block__title">简介</h3>
+            <h3 class="block__title">Introduction</h3>
             <p class="block__text">日常学习与兴趣交流的个人博客</p>
         </div>
     
 
     <div class="sidebar__block">
-        <h3 class="block__title">文章分类</h3>
+        <h3 class="block__title">Categories</h3>
         
     </div>
     
     <div class="sidebar__block">
-        <h3 class="block__title">最新文章</h3>
+        <h3 class="block__title">Latest Post</h3>
         
         <ul class="block-list latest-post-list">
             
+                    <li class="latest-post-item">
+                        <a href="/2018/05/07/netstack_linklayer/" title="Netstack(II) 链路层">
+                            <div class="item__cover">
+                                <img src="/images/netstack/cover.jpg" alt="Netstack(II) 链路层">
+                            </div>
+                            <div class="item__info">
+                                <h3 class="item__title">Netstack(II) 链路层</h3>
+                                <span class="item__text">2018-05-07</span>
+                            </div>
+                        </a>
+                    </li>
+                
                     <li class="latest-post-item">
                         <a href="/2018/04/20/netstack_conn_handshake/" title="netstack TCP(II) 连接管理与三次握手">
                             <div class="item__cover">
@@ -106,24 +120,12 @@
                         </a>
                     </li>
                 
-                    <li class="latest-post-item">
-                        <a href="/2018/04/05/tcp_faq/" title="TCP 疑难杂症">
-                            <div class="item__cover">
-                                <img src="/images/tcp/faq.jpg" alt="TCP 疑难杂症">
-                            </div>
-                            <div class="item__info">
-                                <h3 class="item__title">TCP 疑难杂症</h3>
-                                <span class="item__text">2018-04-05</span>
-                            </div>
-                        </a>
-                    </li>
-                
         </ul>
     
     </div>
 
     <div class="sidebar__block">
-        <h3 class="block__title">文章标签</h3>
+        <h3 class="block__title">Tags</h3>
         
         <ul class="block-list tag-list clearfix">
             
@@ -183,7 +185,7 @@
         <div class="page__container footer__container">
             
             <div class="footer-top__item footer-top__item--2">
-                <h3 class="item__title">关于</h3>
+                <h3 class="item__title">About</h3>
                 <div class="item__content">
                     <p class="item__text">本站是基于 Hexo 搭建的静态资源博客，主要用于分享日常学习、生活及工作的一些心得总结，欢迎点击右下角订阅 rss。</p>
                     <ul class="footer__contact-info">
