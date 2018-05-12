@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><title>node 模块机制 | LOVAE BLOG</title><meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="format-detection" content="telephone=no"><meta name="author" content="Lovae"><meta name="designer" content="minfive"><meta name="keywords" content="lovae, shichao blog, 前端博客, 前端, 程序员, 前端开发, 全栈开发, node.js, javascript"><meta name="description" content="日常学习与兴趣交流的个人博客"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=yes"><meta name="mobile-web-app-capable" content="yes"><meta name="robots" content="all"><link rel="canonical" href="http://littlechao.top/2018/03/14/node_commonJS/index.html"><link rel="icon" type="image/png" href="http://oo12ugek5.bkt.clouddn.com/blog/images/favicon.ico" sizes="32x32"><link rel="stylesheet" href="/scss/base/index.css"><link rel="alternate" href="/atom.xml" title="Hexo"><link rel="stylesheet" href="/scss/views/page/post.css"></head><body ontouchstart><div id="page-loading" class="page page-loading" style="background-image:url(http://oo12ugek5.bkt.clouddn.com/blog/images/loader.gif)"></div><div id="page" class="page js-hidden"><header class="page__small-header page__header--small"><nav class="page__navbar"><div class="page__container navbar-container"><a class="page__logo" href="/" title="Hexo" alt="Hexo"><img src="https://image.littlechao.top/20180506131200000003.jpg" alt="Hexo"></a><nav class="page__nav"><ul class="nav__list clearfix"><li class="nav__item"><a href="/" alt="Home" title="Home">Home</a></li><li class="nav__item"><a href="/archive" alt="Archive" title="Archive">Archive</a></li><li class="nav__item"><a href="/about" alt="About" title="About">About</a></li></ul></nav><button class="page__menu-btn" type="button"><i class="iconfont icon-menu"></i></button></div></nav></header><main class="page__container page__main"><div class="page__content"><article class="page__post"><div class="post__cover"><img src="/images/node_module/cover.jpg" alt="node 模块机制"></div><header class="post__info"><h1 class="post__title">node 模块机制</h1><div class="post__mark"><div class="mark__block"><i class="mark__icon iconfont icon-write"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/">Lovae</a></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-time"></i><ul class="mark__list clearfix"><li class="mark__item"><span>2018-03-14</span></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-tab"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/tags/JavaScript/">JavaScript</a></li><li class="mark__item"><a href="/tags/node/">Node</a></li></ul></div></div></header><div class="post__content"><h1 id="node-模块机制"><a href="#node-模块机制" class="headerlink" title="node 模块机制"></a>node 模块机制</h1><h3 id="模块引用"><a href="#模块引用" class="headerlink" title="模块引用"></a>模块引用</h3><p>示例代码如下：</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">"fs"</span>);</span><br></pre></td></tr></table></figure>
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>node 模块机制 | LOVAE BLOG</title><meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="format-detection" content="telephone=no"><meta name="author" content="Lovae"><meta name="designer" content="minfive"><meta name="keywords" content="lovae, shichao blog, 前端博客, 前端, 程序员, 前端开发, 全栈开发, node.js, javascript, 后台, golang, 网络编程"><meta name="description" content="日常学习与兴趣交流的个人博客"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=yes"><meta name="mobile-web-app-capable" content="yes"><meta name="robots" content="all"><link rel="canonical" href="http://littlechao.top/2018/03/14/node_commonJS/index.html"><link rel="icon" type="image/png" href="https://image.littlechao.top/20180512113931000007.jpg" sizes="32x32"><link rel="stylesheet" href="/scss/base/index.css"><link rel="alternate" href="/atom.xml" title="Hexo"><link rel="stylesheet" href="/scss/views/page/post.css"></head><body ontouchstart><div id="page-loading" class="page page-loading" style="background-image:url(http://oo12ugek5.bkt.clouddn.com/blog/images/loader.gif)"></div><div id="page" class="page js-hidden"><header class="page__small-header page__header--small"><nav class="page__navbar"><div class="page__container navbar-container"><a class="page__logo" href="/" title="Hexo" alt="Hexo"><img src="https://image.littlechao.top/20180506131200000003.jpg" alt="Hexo"></a><nav class="page__nav"><ul class="nav__list clearfix"><li class="nav__item"><a href="/" alt="Home" title="Home">Home</a></li><li class="nav__item"><a href="/archive" alt="Archive" title="Archive">Archive</a></li><li class="nav__item"><a href="/about" alt="About" title="About">About</a></li></ul></nav><button class="page__menu-btn" type="button"><i class="iconfont icon-menu"></i></button></div></nav></header><main class="page__container page__main"><div class="page__content"><article class="page__post"><div class="post__cover"><img src="/images/node_module/cover.jpg" alt="node 模块机制"></div><header class="post__info"><h1 class="post__title">node 模块机制</h1><div class="post__mark"><div class="mark__block"><i class="mark__icon iconfont icon-write"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/">Lovae</a></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-time"></i><ul class="mark__list clearfix"><li class="mark__item"><span>2018-03-14</span></li></ul></div><div class="mark__block"><i class="mark__icon iconfont icon-tab"></i><ul class="mark__list clearfix"><li class="mark__item"><a href="/tags/JavaScript/">JavaScript</a></li><li class="mark__item"><a href="/tags/node/">Node</a></li></ul></div></div></header><div class="post__content"><h1 id="node-模块机制"><a href="#node-模块机制" class="headerlink" title="node 模块机制"></a>node 模块机制</h1><h3 id="模块引用"><a href="#模块引用" class="headerlink" title="模块引用"></a>模块引用</h3><p>示例代码如下：</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">"fs"</span>);</span><br></pre></td></tr></table></figure>
 <p>在 CommonJS 规范中，require 接受一个模块标志，以此引入模块的 API。</p>
 <p>模块提供了 exports 对象来导出方法或变量，另外还有一个 module 对象，该对象即模块本身，而在 nodejs 中，文件就是模块。在 module 对象上有一个 module.exports 属性，这是其导出的内容，变量 exports 指向的地址就是 module.exports。也就是说：</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports === exports</span><br></pre></td></tr></table></figure>
@@ -46,12 +46,12 @@
         <div class="post__prevs">
             <div class="post__prev">
                 
-                <a href="/2018/03/04/Go unsafe 包/" title="golang unsafe 包"><i class="iconfont icon-prev"></i>golang unsafe 包</a>
+                <a href="/2018/03/04/Go net:http:serve.go 阅读笔记/" title="Go http/server.go"><i class="iconfont icon-prev"></i>Go http/server.go</a>
                 
             </div>
             <div class="post__prev post__prev--right">
                 
-                <a href="/2018/03/17/TCPConn/" title="TCP 连接管理">TCP 连接管理<i class="iconfont icon-next"></i></a>
+                <a href="/2018/03/17/node_async_io/" title="Node 异步 I/O">Node 异步 I/O<i class="iconfont icon-next"></i></a>
                 
             </div>
         </div>
@@ -81,7 +81,7 @@
 
     <div class="sidebar__block">
         <h3 class="block__title">Categories</h3>
-        
+        <ul class="block-list"><li class="block-list-item"><a class="block-list-link" href="/categories/网络/">网络</a><span class="block-list-count">1</span></li></ul>
     </div>
     
     <div class="sidebar__block">
@@ -204,7 +204,7 @@
             <div class="footer-top__item footer-top__item--2">
                 <h3 class="item__title">About</h3>
                 <div class="item__content">
-                    <p class="item__text">本站是基于 Hexo 搭建的静态资源博客，主要用于分享日常学习、生活及工作的一些心得总结，欢迎点击右下角订阅 rss。</p>
+                    <p class="item__text">本站是基于 Hexo 搭建的静态资源博客，主要用于分享日常学习、生活及工作的一些心得总结。</p>
                     <ul class="footer__contact-info">
                         <li class="contact-info__item">
                             <i class="iconfont icon-address"></i>
@@ -221,7 +221,7 @@
             
             
                 <div class="footer-top__item footer__image">
-                    <img src="http://oo12ugek5.bkt.clouddn.com/images/qrcode.png" alt="logo" title="Hexo">
+                    <img src="https://image.littlechao.top/20180512113439000006.jpg" alt="logo" title="Hexo">
                 </div>
             
             
