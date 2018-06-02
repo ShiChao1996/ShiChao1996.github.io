@@ -2,16 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://littlechao.top/2018/06/01/go_http_server_2/</loc>
+    <loc>http://littlechao.top/2018/05/29/go_http_server_1/</loc>
     
-    <lastmod>2018-06-01T14:55:36.544Z</lastmod>
+    <lastmod>2018-06-02T07:30:40.587Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/05/29/go_http_server_1/</loc>
+    <loc>http://littlechao.top/2018/06/01/go_http_server_2/</loc>
     
-    <lastmod>2018-06-01T14:53:41.744Z</lastmod>
+    <lastmod>2018-06-02T07:30:40.577Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://littlechao.top/2018/06/02/go_http_server_3/</loc>
+    
+    <lastmod>2018-06-02T07:30:10.003Z</lastmod>
     
   </url>
   
