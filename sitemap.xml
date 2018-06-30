@@ -2,245 +2,259 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://littlechao.top/2018/06/22/nat_firewall/</loc>
+    <loc>https://littlechao.top/categories/index.html</loc>
     
-    <lastmod>2018-06-22T15:56:58.692Z</lastmod>
+    <lastmod>2018-06-30T07:21:14.840Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/06/17/dhcp/</loc>
+    <loc>https://littlechao.top/network-protocol/nat_firewall.html</loc>
+    
+    <lastmod>2018-06-30T03:33:18.830Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://littlechao.top/uncategorized/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%85%A5%E9%97%A8.html</loc>
+    
+    <lastmod>2018-06-30T03:24:39.787Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://littlechao.top/network-protocol/dhcp.html</loc>
     
     <lastmod>2018-06-17T09:17:47.515Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/02/05/byte/</loc>
+    <loc>https://littlechao.top/go-sdk/byte.html</loc>
     
     <lastmod>2018-06-15T16:07:17.942Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/03/04/Go%20unsafe%20%E5%8C%85/</loc>
+    <loc>https://littlechao.top/go-sdk/Go%20unsafe%20%E5%8C%85.html</loc>
     
     <lastmod>2018-06-15T16:05:05.560Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/03/01/golang%20net:dial.go/</loc>
+    <loc>https://littlechao.top/go-sdk/golang%20net:dial.go.html</loc>
     
     <lastmod>2018-06-15T16:05:05.555Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/06/15/go_sdk_runtime_string/</loc>
+    <loc>https://littlechao.top/go-sdk/go_sdk_runtime_string.html</loc>
     
     <lastmod>2018-06-15T16:05:05.551Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/03/02/Go%20net:dial.go%20%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0(%E4%BA%8C)/</loc>
+    <loc>https://littlechao.top/go-sdk/Go%20net:dial.go%20%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0(%E4%BA%8C).html</loc>
     
     <lastmod>2018-06-15T16:05:05.532Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/06/12/arp/</loc>
+    <loc>https://littlechao.top/network-protocol/arp.html</loc>
     
     <lastmod>2018-06-13T13:11:58.588Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/04/05/tcp_faq/</loc>
+    <loc>https://littlechao.top/network-protocol/tcp_faq.html</loc>
     
     <lastmod>2018-06-12T08:17:05.157Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/04/03/tcp_keepalive/</loc>
+    <loc>https://littlechao.top/network-protocol/tcp_keepalive.html</loc>
     
     <lastmod>2018-06-12T08:17:05.153Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/03/26/tcp_window_management/</loc>
+    <loc>https://littlechao.top/network-protocol/tcp_window_management.html</loc>
     
     <lastmod>2018-06-12T08:17:05.148Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/03/17/TCPConn/</loc>
+    <loc>https://littlechao.top/network-protocol/TCPConn.html</loc>
     
     <lastmod>2018-06-12T08:17:05.143Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/03/20/tcp_retransmission/</loc>
+    <loc>https://littlechao.top/network-protocol/tcp_retransmission.html</loc>
     
     <lastmod>2018-06-12T08:17:05.138Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/03/30/tcp_congestion_control/</loc>
+    <loc>https://littlechao.top/network-protocol/tcp_congestion_control.html</loc>
     
     <lastmod>2018-06-12T08:15:02.970Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/06/04/ip_addr/</loc>
+    <loc>https://littlechao.top/network-protocol/ip_addr.html</loc>
     
     <lastmod>2018-06-12T08:13:11.623Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/06/10/internet_protocol/</loc>
+    <loc>https://littlechao.top/network-protocol/internet_protocol.html</loc>
     
     <lastmod>2018-06-12T08:13:11.618Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/05/29/go_http_server_1/</loc>
+    <loc>https://littlechao.top/uncategorized/go_http_server_1.html</loc>
     
     <lastmod>2018-06-02T07:30:40.587Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/06/01/go_http_server_2/</loc>
+    <loc>https://littlechao.top/uncategorized/go_http_server_2.html</loc>
     
     <lastmod>2018-06-02T07:30:40.577Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/06/02/go_http_server_3/</loc>
+    <loc>https://littlechao.top/uncategorized/go_http_server_3.html</loc>
     
     <lastmod>2018-06-02T07:30:10.003Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/about/index.html</loc>
+    <loc>https://littlechao.top/about/index.html</loc>
     
     <lastmod>2018-05-30T14:33:37.015Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/404/404.html</loc>
+    <loc>https://littlechao.top/404/404.html</loc>
     
     <lastmod>2018-05-21T07:25:47.949Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/404/index.html</loc>
+    <loc>https://littlechao.top/404/index.html</loc>
     
     <lastmod>2018-05-21T07:25:47.927Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/archives/index.html</loc>
+    <loc>https://littlechao.top/archives/index.html</loc>
     
     <lastmod>2018-05-19T02:25:59.663Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/04/20/netstack_conn_handshake/</loc>
+    <loc>https://littlechao.top/netstack-tcp/netstack_conn_handshake.html</loc>
     
     <lastmod>2018-05-19T02:24:00.898Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/05/17/netstack_tcp_receive/</loc>
+    <loc>https://littlechao.top/netstack-tcp/netstack_tcp_receive.html</loc>
     
     <lastmod>2018-05-17T12:49:44.362Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/05/15/netstack_tcp_send/</loc>
+    <loc>https://littlechao.top/netstack-tcp/netstack_tcp_send.html</loc>
     
     <lastmod>2018-05-17T12:49:44.355Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/04/16/netstack_tcp_overview/</loc>
+    <loc>https://littlechao.top/netstack-tcp/netstack_tcp_overview.html</loc>
     
     <lastmod>2018-05-17T12:49:44.335Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/404.html</loc>
+    <loc>https://littlechao.top/404.html</loc>
     
     <lastmod>2018-05-12T11:51:01.982Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/05/07/netstack_linklayer/</loc>
+    <loc>https://littlechao.top/uncategorized/netstack_linklayer.html</loc>
     
     <lastmod>2018-05-07T15:39:40.522Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2017/11/21/learn-into-javaScript_call&bind&apply/</loc>
+    <loc>https://littlechao.top/uncategorized/learn-into-javaScript_call&bind&apply.html</loc>
     
     <lastmod>2018-04-20T08:30:16.369Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/03/14/node_commonJS/</loc>
+    <loc>https://littlechao.top/uncategorized/node_commonJS.html</loc>
     
     <lastmod>2018-04-20T08:30:16.353Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2017/12/15/dart%20%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%A1%80/</loc>
+    <loc>https://littlechao.top/uncategorized/dart%20%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%A1%80.html</loc>
     
     <lastmod>2018-04-20T08:30:16.347Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/03/17/node_async_io/</loc>
+    <loc>https://littlechao.top/uncategorized/node_async_io.html</loc>
     
     <lastmod>2018-04-20T08:30:16.340Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2017/10/08/redux/</loc>
+    <loc>https://littlechao.top/uncategorized/redux.html</loc>
     
     <lastmod>2018-04-20T08:30:16.325Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://littlechao.top/2018/04/15/intellij%20%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E9%87%8A/</loc>
+    <loc>https://littlechao.top/uncategorized/intellij%20%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E9%87%8A.html</loc>
     
     <lastmod>2018-04-20T08:30:16.312Z</lastmod>
     
